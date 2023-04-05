@@ -1,10 +1,40 @@
-import { v2 as cloudinary } from "cloudinary";
-import dotenv from "dotenv";
+// THIS FILE WILL PROBABLY BE TERMINATED -> PENDING TEAM APPROVAL
 
-dotenv.config();
+// const cloudinary = require('cloudinary').v2;
+// const { CloudinaryStorage } = require("multer-storage-cloudinary");
+// const dotenv = require('dotenv').config();
 
-cloudinary.config({
-  cloud_name: process.env.CLOUD_NAME,
-  api_key: process.env.API_KEY,
-  api_secret: process.env.API_SECRET,
-});
+// // destruct envs
+// const { CLOUD_NAME, API_KEY, API_SECRET } = process.env;
+
+// // export cloudinary configuration
+// module.exports.cloudinary = cloudinary.config({
+//   cloud_name: CLOUD_NAME,
+//   api_key: API_KEY,
+//   api_secret: API_SECRET,
+// });
+
+// module.exports.storage = new CloudinaryStorage({
+//   cloudinary: cloudinary,
+//   params: {
+//     folder: "profile_pictures",
+//     format: async (req, file) => {
+//       let format;
+//       switch (file.mimetype) {
+//         case "image/jpeg":
+//           format = "jpg";
+//           break;
+//         case "image/png":
+//           format = "png";
+//           break;
+//         case "image/gif":
+//           format = "gif";
+//           break;
+//         default:
+//           format = "jpg";
+//           break;
+//       }
+//       return format;
+//     }, // set desired file format here
+//   },
+// });
