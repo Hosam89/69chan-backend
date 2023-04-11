@@ -155,9 +155,5 @@ route
         }
     });
 
-
-
-
-
 module.exports = route;
 

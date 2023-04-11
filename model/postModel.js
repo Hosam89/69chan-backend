@@ -5,8 +5,10 @@ const PostSchema = new mongoose.Schema({
   description: { type: String, required: true },
   mediaUrl: { type: String },
   user: { type: mongoose.Schema.Types.ObjectId, ref: "User" }, // nickname / pfp
-  comments: [{ type: mongoose.Schema.Types.ObjectId, ref: "Comment" }],
-  likes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }], // uid
+  // comments: [{ type: mongoose.Schema.Types.ObjectId, ref: "Comment" }],
+  comments: [{ type: String, maxlength: 50 }],
+  // likes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }], // uid
+  likes: Number,
   tags: [String], // zu was gehört der Post für algo
 });
 

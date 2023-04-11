@@ -13,6 +13,7 @@ const socketio = require('socket.io');
 
 // import routes (modules)
 const userRoute = require('./routes/userRoute');
+const postRoute = require('./routes/postRoute');
 
 // initialize express
 const app = express();
@@ -54,6 +55,7 @@ app.use(express.json());
 
 // use created routes (modules)
 app.use("/users", userRoute);
+app.use("/posts", postRoute);
 
 // listen to server
 app.listen(PORT || 3003, () => {
