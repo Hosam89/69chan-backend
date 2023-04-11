@@ -1,10 +1,12 @@
-const mongoose = require("mongoose");
+// IGNORE AND ASK MARCEL WTF
 
-const UserProfileSchema = new mongoose.Schema({
-  user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-  name: { type: String },
-  nickname: { type: String },
-  profilePicture: { type: String },
-});
+// const mongoose = require("mongoose");
 
-const UserProfile = mongoose.model;
+// const UserProfileSchema = new mongoose.Schema({
+//   user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+//   name: { type: String },
+//   nickname: { type: String },
+//   profilePicture: { type: String },
+// });
+
+// const UserProfile = mongoose.model;
