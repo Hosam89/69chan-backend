@@ -120,6 +120,6 @@ route
     });
 
 // add update and delete routes for posts and users
-// use params etc.
+// use params etc. entirely ignore updateusermodel
 
 module.exports = route;
