@@ -60,7 +60,7 @@ const route = express.Router();
 
 // define POST endpoint for signing up a new user to db
 route
-    .post('/signup', upload.single('profilePicture'), async (req, res) => {
+    .post('/add', upload.single('profilePicture'), async (req, res) => {
         // generate salt and hash for the user password
         const salt = bcrypt.genSaltSync(Number(SALT_ROUND));
         const hash = bcrypt.hashSync(req.body.password, salt);
@@ -81,7 +81,7 @@ route
                 await newUser.save();
                 // upload profilePicture to cloudinary with user ID as public ID
                 const result = await cloudinary.uploader.upload(req.file.path, {
-                    public_id: `profile_picture_${newUser._id}`,
+                    public_id: `profile_picture/${newUser._id}`,
                 });
                 // update newUser with profilePicture URL
                 newUser.profilePicture = result.secure_url;
@@ -122,10 +122,8 @@ route
             // catch errors and send status 302 response with thrown error msgs
             res.status(302).json({ message: err.message });
         }
-    });
-
-// define GET endpoint for retrieving a single user by ID
-route
+    })
+    // define GET endpoint for retrieving a single user by ID
     .get('/:id', async ( req, res) => {
         // extract user ID from request params
         const id = req.params.id;
@@ -138,10 +136,8 @@ route
             // respond with status 404 and err msg
             res.status(404).json(err);
         }
-    });
-
-// define route handler for GET request on root endpoint
-route
+    })
+    // define route handler for GET request on root endpoint
     .get('/', async (req, res) => {
         try {
             // fetch all users from db 
@@ -152,6 +148,28 @@ route
         } catch (err) {
             // respond with status 404 and err msg
             res.status(404).json(err);
+        }
+    })
+    // define DELETE endpoint for deleting a user from db
+    .delete('/delete/:id', async (req, res) => {
+        // extract post ID from request params
+        const id = req.params.id;
+        try {
+            const user = await User.findById(id);
+            console.log(user);
+            // find user by ID and delete it
+            if (!user) {
+                res.status(404).json({ message: 'User not found.' });
+            } else {
+                // this deletes any profile pictures on cloudinary as well
+                await cloudinary.uploader.destroy(`profile_picture/${user._id}`);
+                // this deletes the user data from mongoDB
+                await User.deleteOne({ _id: id });
+                res.status(201).json('User deleted.');
+            };
+        } catch (err) {
+            // respond with status 500 and err msg
+            res.status(500).json(err);
         }
     });
 
