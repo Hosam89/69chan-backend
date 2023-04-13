@@ -102,10 +102,8 @@ route
             // respond with status 404 and err msg
             res.status(404).json(err);
         }
-    });
-
-// define route handler for GET request on root endpoint
-route
+    })
+    // define route handler for GET request on root endpoint
     .get('/', async (req, res) => {
         try {
             // fetch all posts from db 
@@ -117,9 +115,31 @@ route
             // respond with status 404 and err msg
             res.status(404).json(err);
         }
+    })
+    // define DELETE endpoint for deleting a single user post
+    .delete('/delete/:id', async (req, res) => {
+        // extract post ID from request params
+        const id = req.params.id;
+        try {
+            const post = await Post.findById(id);
+            console.log(post);
+            // find post by ID and delete it
+            if (!post) {
+              res.status(404).json({ message: 'Post not found.' });
+            } else {
+              // this deletes any image uploads to cloudinary as well
+              await cloudinary.uploader.destroy(`user_posts/${post.user}/post`);
+              // this deletes the post data from mongoDB
+              await Post.deleteOne({ _id: id });
+              res.status(201).json('Post deleted.');
+            };
+        } catch (err) {
+            // respond with status 500 and err msg
+            res.status(500).json(err);
+        }
     });
 
-// add update and delete routes for posts and users
+// add update route for posts and users
 // use params etc. entirely ignore updateusermodel
 
 module.exports = route;
