@@ -1,18 +1,18 @@
 // import dependencies
-const bcrypt = require('bcrypt');
-const cloudinary = require('cloudinary').v2;
-const { CloudinaryStorage } = require('multer-storage-cloudinary');
-const cors = require('cors');
-const dotenv = require('dotenv').config();
-const express = require('express');
-const jwt = require('jsonwebtoken');
-const mongoose = require('mongoose');
-const multer = require('multer');
-const { multerStorageCloudinary } = require('multer-storage-cloudinary');
-const socketio = require('socket.io');
-
+const bcrypt = require("bcrypt");
+const cloudinary = require("cloudinary").v2;
+const { CloudinaryStorage } = require("multer-storage-cloudinary");
+const cors = require("cors");
+const dotenv = require("dotenv").config();
+const express = require("express");
+const jwt = require("jsonwebtoken");
+const mongoose = require("mongoose");
+const multer = require("multer");
+const { multerStorageCloudinary } = require("multer-storage-cloudinary");
+const socketio = require("socket.io");
+const User = require("../model/userModel");
 // import models
-const Post = require('../model/postModel');
+const Post = require("../model/postModel");
 
 // destruct envs
 const { CLOUD_NAME, API_KEY, API_SECRET, SALT_ROUND } = process.env;
@@ -61,83 +61,104 @@ const route = express.Router();
 
 // define POST endpoint for user posts
 route
-    .post('/add', upload.single('mediaUrl'), async (req, res) => {
-        // create a new post object from Post model
-        const newPost = new Post({
-            title: req.body.title,
-            description: req.body.description,
-            mediaUrl: req.file.path,
-            user: req.body.user,
-            comments: req.body.comments,
-            likes: req.body.likes,
-            tags: req.body.tags
-        })
-        try {
-            await newPost.save();
- 
-            const result = await cloudinary.uploader.upload(req.file.path, {
-                public_id: `user_posts/${newPost.user}/post`,
-            });
-
-            newPost.mediaUrl = result.secure_url;
-            await newPost.save();
-
-            res.status(201).json(newPost);
-
-        } catch (err) {
-            // catch errors and send status 302 response with thrown error msg
-            res.status(302).json({ message: err.message });
-        }
-    })
-    // define GET endpoint for retrieving a single user post
-    .get('/:id', async ( req, res) => {
-        // extract post ID from request params
-        const id = req.params.id;
-        try {
-            // attempt post retrieval by ID
-            const post = await Post.find({ _id: id });
-            // respond with status 200 and post data
-            res.status(200).json(post);
-        } catch (err) {
-            // respond with status 404 and err msg
-            res.status(404).json(err);
-        }
-    })
-    // define route handler for GET request on root endpoint
-    .get('/', async (req, res) => {
-        try {
-            // fetch all posts from db 
-            const posts = await Post.find();
-            res.status(200).json(posts);
-            // respond with status 200 and posts
-            res.status(200).json;
-        } catch (err) {
-            // respond with status 404 and err msg
-            res.status(404).json(err);
-        }
-    })
-    // define DELETE endpoint for deleting a single user post
-    .delete('/delete/:id', async (req, res) => {
-        // extract post ID from request params
-        const id = req.params.id;
-        try {
-            const post = await Post.findById(id);
-            console.log(post);
-            // find post by ID and delete it
-            if (!post) {
-              res.status(404).json({ message: 'Post not found.' });
-            } else {
-              // this deletes any image uploads to cloudinary as well
-              await cloudinary.uploader.destroy(`user_posts/${post.user}/post`);
-              // this deletes the post data from mongoDB
-              await Post.deleteOne({ _id: id });
-              res.status(201).json('Post deleted.');
-            };
-        } catch (err) {
-            // respond with status 500 and err msg
-            res.status(500).json(err);
-        }
+  .post("/add", upload.single("mediaUrl"), async (req, res) => {
+    // create a new post object from Post model
+    const newPost = new Post({
+      title: req.body.title,
+      description: req.body.description,
+      mediaUrl: req.file.path,
+      user: req.body.user,
+      comments: req.body.comments,
+      likes: req.body.likes,
+      tags: req.body.tags,
     });
+    try {
+      await newPost.save();
+
+      const result = await cloudinary.uploader.upload(req.file.path, {
+        public_id: `user_posts/${newPost.user}/post`,
+      });
+
+      newPost.mediaUrl = result.secure_url;
+      await newPost.save();
+
+      res.status(201).json(newPost);
+    } catch (err) {
+      // catch errors and send status 302 response with thrown error msg
+      res.status(302).json({ message: err.message });
+    }
+  })
+  // define GET endpoint for retrieving a single user post
+  .get("/:id", async (req, res) => {
+    // extract post ID from request params
+    const id = req.params.id;
+    try {
+      // attempt post retrieval by ID
+      const post = await Post.find({ _id: id });
+      // respond with status 200 and post data
+      res.status(200).json(post);
+    } catch (err) {
+      // respond with status 404 and err msg
+      res.status(404).json(err);
+    }
+  })
+  // define route handler for GET request on root endpoint
+  .get("/", async (req, res) => {
+    try {
+      // fetch all posts from db
+      const posts = await Post.find();
+      // respond with status 200 and posts
+      res.status(200).json(posts);
+    } catch (err) {
+      // respond with status 404 and err msg
+      res.status(404).json(err);
+    }
+  })
+  //Rout to fetch all post for one user
+  .get("/userPost/:userId", async (req, res) => {
+    try {
+      const userId = req.params.userId;
+
+      const userFound = await User.find({ _id: userId });
+
+      if (!userFound) {
+        res.status(404).json("User is not registerd");
+      }
+      // fetch all posts from db
+      const userPosts = await Post.find({ user: userId });
+
+      if (!userPosts) {
+        res.status(404).json(`${userFound.name} dose not have anu y posts yet`);
+      }
+      res.status(200).json(userPosts);
+      // respond with status 200 and posts
+    } catch (err) {
+      // respond with status 404 and err msg
+      res.status(404).json(err);
+    }
+  })
+  // define DELETE endpoint for deleting a single user post
+  .delete("/delete/:id", async (req, res) => {
+    // extract post ID from request params
+    const id = req.params.id;
+    try {
+      const post = await Post.findById(id);
+      console.log(post);
+      // find post by ID and delete it
+      if (!post) {
+        res.status(404).json({ message: "Post not found." });
+      } else {
+        // this deletes any image uploads to cloudinary as well
+        await cloudinary.uploader.destroy(`user_posts/${post.user}/post`);
+        // this deletes the post data from mongoDB
+        await Post.deleteOne({ _id: id });
+        res.status(201).json("Post deleted.");
+      }
+    } catch (err) {
+      // respond with status 500 and err msg
+      res.status(500).json(err);
+    }
+  });
 
 // add update route for posts and users
 // use params etc. entirely ignore updateusermodel
