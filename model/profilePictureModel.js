@@ -1,10 +1,12 @@
-const mongoose = require("mongoose");
+// NOT USED FOR THIS PROJECT
 
-const ProfilePictureSchema = new mongoose.Schema({
-  user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-  imageUrl: { type: String, required: true },
-});
+// const mongoose = require("mongoose");
 
-const ProfilePicture = mongoose.model("ProfilePicture", ProfilePictureSchema);
+// const ProfilePictureSchema = new mongoose.Schema({
+//   user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+//   imageUrl: { type: String, required: true },
+// });
 
-module.exports = ProfilePicture;
+// const ProfilePicture = mongoose.model("ProfilePicture", ProfilePictureSchema);
+
+// module.exports = ProfilePicture;

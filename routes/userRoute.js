@@ -56,7 +56,8 @@ const upload = multer({ storage: storage });
 // create new router object
 const route = express.Router();
 
-// Note: Routes are added in order of complexity as it's considered best practice
+// Note: Routes are added in order of complexity as it's considered best practice.
+// That should be the case, but I'm too lazy to put the patch route above the rest, lul.
 
 // define POST endpoint for signing up a new user to db
 route
@@ -171,7 +172,39 @@ route
             // respond with status 500 and err msg
             res.status(500).json(err);
         }
+    })
+    // define PATCH endpoint for updating aspects of a single user post
+    .patch('/patch/:id', async (req, res) => {
+        // extract user ID from request params
+        const id = req.params.id;
+        try {
+            // before we can update we still MUST find the post first
+            const user = await User.findById(id);
+            // if the user was not found, respond with err msg
+            if (!user) {
+                res.status(404).json({ message: 'User not found.' });
+            // else update the found user modularly
+            } else {
+                const salt = bcrypt.genSaltSync(Number(SALT_ROUND));
+                const hash = bcrypt.hashSync(req.body.password, salt);
+                // findOneAndUpdate detects every field of the user and allows updating them
+                await User.findOneAndUpdate(
+                { _id: id },
+                { $set: {
+                    name: req.body.name || user.name,
+                    email: req.body.email || user.email,
+                    password: hash || user.password,
+                    profilePicture: req.file ? req.file.path : user.profilePicture
+                }}
+                );
+                // respond with OK status and msg
+                res.status(200).json({ message: 'User edited.' });
+            }
+        } catch (err) {
+            // respond with status 500 and err msg
+            res.status(500).json({ message: err.message });
+        }
     });
-
+//goo goo gaga
 module.exports = route;
 

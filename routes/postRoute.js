@@ -57,7 +57,8 @@ const upload = multer({ storage: storage });
 // create new router object
 const route = express.Router();
 
-// Note: Routes are added in order of complexity as it's considered best practice
+// Note: Routes are added in order of complexity as it's considered best practice.
+// That should be the case, but I'm too lazy to put the patch route above the rest, lul.
 
 // define POST endpoint for user posts
 route
@@ -82,85 +83,92 @@ route
       newPost.mediaUrl = result.secure_url;
       await newPost.save();
 
-      res.status(201).json(newPost);
-    } catch (err) {
-      // catch errors and send status 302 response with thrown error msg
-      res.status(302).json({ message: err.message });
-    }
-  })
-  // define GET endpoint for retrieving a single user post
-  .get("/:id", async (req, res) => {
-    // extract post ID from request params
-    const id = req.params.id;
-    try {
-      // attempt post retrieval by ID
-      const post = await Post.find({ _id: id });
-      // respond with status 200 and post data
-      res.status(200).json(post);
-    } catch (err) {
-      // respond with status 404 and err msg
-      res.status(404).json(err);
-    }
-  })
-  // define route handler for GET request on root endpoint
-  .get("/", async (req, res) => {
-    try {
-      // fetch all posts from db
-      const posts = await Post.find();
-      // respond with status 200 and posts
-      res.status(200).json(posts);
-    } catch (err) {
-      // respond with status 404 and err msg
-      res.status(404).json(err);
-    }
-  })
-  //Rout to fetch all post for one user
-  .get("/userPost/:userId", async (req, res) => {
-    try {
-      const userId = req.params.userId;
 
-      const userFound = await User.find({ _id: userId });
+        } catch (err) {
+            // catch errors and send status 302 response with thrown error msg
+            res.status(302).json({ message: err.message });
+        }
+    })
+    // define GET endpoint for retrieving a single user post
+    .get('/:id', async ( req, res) => {
+        // extract post ID from request params
+        const id = req.params.id;
+        try {
+            // attempt post retrieval by ID
+            const post = await Post.find({ _id: id });
+            // respond with status 200 and post data
+            res.status(200).json(post);
+        } catch (err) {
+            // respond with status 404 and err msg
+            res.status(404).json(err);
+        }
+    })
+    // define route handler for GET request on root endpoint
+    .get('/', async (req, res) => {
+        try {
+            // fetch all posts from db 
+            const posts = await Post.find();
+            res.status(200).json(posts);
+            // respond with status 200 and posts
+            res.status(200).json;
+        } catch (err) {
+            // respond with status 404 and err msg
+            res.status(404).json(err);
+        }
+    })
+    // define DELETE endpoint for deleting a single user post
+    .delete('/delete/:id', async (req, res) => {
+        // extract post ID from request params
+        const id = req.params.id;
+        try {
+            const post = await Post.findById(id);
+            console.log(post);
+            // find post by ID and delete it
+            if (!post) {
+              res.status(404).json({ message: 'Post not found.' });
+            } else {
+              // this deletes any image uploads to cloudinary as well
+              await cloudinary.uploader.destroy(`user_posts/${post.user}/post`);
+              // this deletes the post data from mongoDB
+              await Post.deleteOne({ _id: id });
+              res.status(201).json('Post deleted.');
+            };
+        } catch (err) {
+            // respond with status 500 and err msg
+            res.status(500).json(err);
+        }
+    })
+    // define PATCH endpoint for updating aspects of a single user post
+    .patch('/patch/:id', async (req, res) => {
+        // extract post ID from request params
+        const id = req.params.id;
+        try {
+            // before we can update we still MUST find the post first
+            const post = await Post.findById(id);
+            // if the post was not found, respond with err msg
+            if (!post) {
+              res.status(404).json({ message: 'Post not found.' });
+            // else update the found post modularly
+            } else {
+              // findOneAndUpdate detects every field of the post and allows updating them
+              await Post.findOneAndUpdate(
+                { _id: id },
+                { $set: {
+                    title: req.body.title || post.title,
+                    description: req.body.description || post.description,
+                    mediaUrl: req.file ? req.file.path : post.mediaUrl,
+                    tags: req.body.tags || post.tags
+                }}
+                );
+                // respond with OK status and msg
+              res.status(200).json({ message: 'Post edited.' });
+            }
+        } catch (err) {
+            // respond with status 500 and err msg
+            res.status(500).json({ message: err.message });
+        }
+    });
 
-      if (!userFound) {
-        res.status(404).json("User is not registerd");
-      }
-      // fetch all posts from db
-      const userPosts = await Post.find({ user: userId });
 
-      if (!userPosts) {
-        res.status(404).json(`${userFound.name} dose not have anu y posts yet`);
-      }
-      res.status(200).json(userPosts);
-      // respond with status 200 and posts
-    } catch (err) {
-      // respond with status 404 and err msg
-      res.status(404).json(err);
-    }
-  })
-  // define DELETE endpoint for deleting a single user post
-  .delete("/delete/:id", async (req, res) => {
-    // extract post ID from request params
-    const id = req.params.id;
-    try {
-      const post = await Post.findById(id);
-      console.log(post);
-      // find post by ID and delete it
-      if (!post) {
-        res.status(404).json({ message: "Post not found." });
-      } else {
-        // this deletes any image uploads to cloudinary as well
-        await cloudinary.uploader.destroy(`user_posts/${post.user}/post`);
-        // this deletes the post data from mongoDB
-        await Post.deleteOne({ _id: id });
-        res.status(201).json("Post deleted.");
-      }
-    } catch (err) {
-      // respond with status 500 and err msg
-      res.status(500).json(err);
-    }
-  });
-
-// add update route for posts and users
-// use params etc. entirely ignore updateusermodel
 
 module.exports = route;
