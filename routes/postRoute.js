@@ -57,7 +57,8 @@ const upload = multer({ storage: storage });
 // create new router object
 const route = express.Router();
 
-// Note: Routes are added in order of complexity as it's considered best practice
+// Note: Routes are added in order of complexity as it's considered best practice.
+// That should be the case, but I'm too lazy to put the patch route above the rest, lul.
 
 // define POST endpoint for user posts
 route
@@ -137,9 +138,37 @@ route
             // respond with status 500 and err msg
             res.status(500).json(err);
         }
+    })
+    // define PATCH endpoint for updating aspects of a single user post
+    .patch('/patch/:id', async (req, res) => {
+        // extract post ID from request params
+        const id = req.params.id;
+        try {
+            // before we can update we still MUST find the post first
+            const post = await Post.findById(id);
+            // if the post was not found, respond with err msg
+            if (!post) {
+              res.status(404).json({ message: 'Post not found.' });
+            // else update the found post modularly
+            } else {
+              // findOneAndUpdate detects every field of the post and allows updating them
+              await Post.findOneAndUpdate(
+                { _id: id },
+                { $set: {
+                    title: req.body.title || post.title,
+                    description: req.body.description || post.description,
+                    mediaUrl: req.file ? req.file.path : post.mediaUrl,
+                    tags: req.body.tags || post.tags
+                }}
+                );
+                // respond with OK status and msg
+              res.status(200).json({ message: 'Post edited.' });
+            }
+        } catch (err) {
+            // respond with status 500 and err msg
+            res.status(500).json({ message: err.message });
+        }
     });
 
-// add update route for posts and users
-// use params etc. entirely ignore updateusermodel
 
 module.exports = route;
