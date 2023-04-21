@@ -1,18 +1,18 @@
 // import dependencies
-const bcrypt = require('bcrypt');
-const cloudinary = require('cloudinary').v2;
-const { CloudinaryStorage } = require('multer-storage-cloudinary');
-const cors = require('cors');
-const dotenv = require('dotenv').config();
-const express = require('express');
-const jwt = require('jsonwebtoken');
-const mongoose = require('mongoose');
-const multer = require('multer');
-const { multerStorageCloudinary } = require('multer-storage-cloudinary');
-const socketio = require('socket.io');
-
+const bcrypt = require("bcrypt");
+const cloudinary = require("cloudinary").v2;
+const { CloudinaryStorage } = require("multer-storage-cloudinary");
+const cors = require("cors");
+const dotenv = require("dotenv").config();
+const express = require("express");
+const jwt = require("jsonwebtoken");
+const mongoose = require("mongoose");
+const multer = require("multer");
+const { multerStorageCloudinary } = require("multer-storage-cloudinary");
+const socketio = require("socket.io");
+const User = require("../model/userModel");
 // import models
-const Post = require('../model/postModel');
+const Post = require("../model/postModel");
 
 // destruct envs
 const { CLOUD_NAME, API_KEY, API_SECRET, SALT_ROUND } = process.env;
@@ -62,28 +62,27 @@ const route = express.Router();
 
 // define POST endpoint for user posts
 route
-    .post('/add', upload.single('mediaUrl'), async (req, res) => {
-        // create a new post object from Post model
-        const newPost = new Post({
-            title: req.body.title,
-            description: req.body.description,
-            mediaUrl: req.file.path,
-            user: req.body.user,
-            comments: req.body.comments,
-            likes: req.body.likes,
-            tags: req.body.tags
-        })
-        try {
-            await newPost.save();
- 
-            const result = await cloudinary.uploader.upload(req.file.path, {
-                public_id: `user_posts/${newPost.user}/post`,
-            });
+  .post("/add", upload.single("mediaUrl"), async (req, res) => {
+    // create a new post object from Post model
+    const newPost = new Post({
+      title: req.body.title,
+      description: req.body.description,
+      mediaUrl: req.file.path,
+      user: req.body.user,
+      comments: req.body.comments,
+      likes: req.body.likes,
+      tags: req.body.tags,
+    });
+    try {
+      await newPost.save();
 
-            newPost.mediaUrl = result.secure_url;
-            await newPost.save();
+      const result = await cloudinary.uploader.upload(req.file.path, {
+        public_id: `user_posts/${newPost.user}/post`,
+      });
 
-            res.status(201).json(newPost);
+      newPost.mediaUrl = result.secure_url;
+      await newPost.save();
+
 
         } catch (err) {
             // catch errors and send status 302 response with thrown error msg
@@ -169,6 +168,7 @@ route
             res.status(500).json({ message: err.message });
         }
     });
+
 
 
 module.exports = route;
