@@ -143,9 +143,8 @@ route
         try {
             // fetch all users from db 
             const users = await User.find();
-            res.status(200).json(users);
             // respond with status 200 and users
-            res.status(200).json;
+            res.status(200).json(users);
         } catch (err) {
             // respond with status 404 and err msg
             res.status(404).json(err);
@@ -153,7 +152,7 @@ route
     })
     // define DELETE endpoint for deleting a user from db
     .delete('/delete/:id', async (req, res) => {
-        // extract post ID from request params
+        // extract user ID from request params
         const id = req.params.id;
         try {
             const user = await User.findById(id);
@@ -205,6 +204,6 @@ route
             res.status(500).json({ message: err.message });
         }
     });
-//goo goo gaga
+
 module.exports = route;
 
