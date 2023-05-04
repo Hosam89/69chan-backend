@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
-const dotenv = require('dotenv').config();
+require('dotenv').config();
 
 const UserSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
@@ -14,7 +14,7 @@ const UserSchema = new mongoose.Schema({
 UserSchema.pre("save", function (next) {
   const user = this;
   if (!user.isModified("password")) return next();
-  bcrypt.hash(user.password, process.env(SALT_ROUND), function (err, hash) {
+  bcrypt.hash(user.password, Number(process.env.SALT_ROUND), function (err, hash) {
     if (err) return next(err);
     user.password = hash;
     next();
@@ -25,7 +25,7 @@ UserSchema.pre("save", function (next) {
 UserSchema.pre('findOneAndUpdate', function (next) {
   const update = this.getUpdate();
   if (update.password) {
-    bcrypt.hash(update.password, process.env(SALT_ROUND), function (err, hash) {
+    bcrypt.hash(update.password, Number(process.env.SALT_ROUND), function (err, hash) {
       if (err) return next(err);
       update.password = hash;
       next();

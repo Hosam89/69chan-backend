@@ -3,7 +3,7 @@ const bcrypt = require('bcrypt');
 const cloudinary = require('cloudinary').v2;
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const cors = require('cors');
-const dotenv = require('dotenv').config();
+require('dotenv').config();
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
@@ -65,6 +65,7 @@ route
         // generate salt and hash for the user password
         const salt = bcrypt.genSaltSync(Number(SALT_ROUND));
         const hash = bcrypt.hashSync(req.body.password, salt);
+        console.log(SALT_ROUND);
         // create a new user object from User model
         const newUser = new User({
             username: req.body.username,
