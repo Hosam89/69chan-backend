@@ -10,16 +10,14 @@ const UserSchema = new mongoose.Schema({
   profilePicture: { type: String },
 });
 
+// usually you do it this way but we save twice because of cloudinary upload of profile pic
+// this causes the hash to occur twice, which in return falsifies our password
 // hash and salt user password before saving to database
-UserSchema.pre("save", function (next) {
-  const user = this;
-  if (!user.isModified("password")) return next();
-  bcrypt.hash(user.password, Number(process.env.SALT_ROUND), function (err, hash) {
-    if (err) return next(err);
-    user.password = hash;
-    next();
-  });
-});
+// UserSchema.pre("save", async function (next) {
+// const salt = await bcrypt.genSalt();
+// this.password = await bcrypt.hash(this.password, salt);
+// next();
+// });
 
 // pre-hook for updating password field
 UserSchema.pre('findOneAndUpdate', function (next) {
