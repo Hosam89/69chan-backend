@@ -10,8 +10,15 @@ const UserSchema = new mongoose.Schema({
   profilePicture: { type: String },
 });
 
-// usually you do it this way but we save twice because of cloudinary upload of profile pic
-// this causes the hash to occur twice, which in return falsifies our password
+// usually you hash/salt inside the appropriate model; like our userModel here.
+//
+// but we save the user-object twice for following two reasons:
+// - the regular data of the user-object gets saved to our mongoDB atlas database.
+// - and the profile picture gets uploaded and saved in an appropriate folder to cloudinary.
+//
+// this triggers the password hash twice, which in return falsifies the user password on login attempt.
+// therefore we ignore the code snippet below and directly salt and hash in our authController.
+//
 // hash and salt user password before saving to database
 // UserSchema.pre("save", async function (next) {
 // const salt = await bcrypt.genSalt();
