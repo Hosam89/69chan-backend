@@ -1,14 +1,15 @@
 // import dependencies
 const User = require('../models/User');
+const { post } = require('../routes/userRoute');
 
 // controller for fetching all current users
 module.exports.getAllUsers = async (req, res, next) => {
     try {
         const users = await User.find();
         if (!users) {
-            throw new Error(`404: No users found in db collection!`);
+            throw new Error({ message: `404: No users found in db collection!`});
         };
-        res.status(200).json(`200: Users found in db collection: ${users}`);
+        res.status(200).json({ message: `200: Users found in db collection: ${users}` });
     } catch (err) {
         // forwards the error to the errorHandler and finally to the error stack trace.
         // the error stack trace is a detailed report of the call stack at the point of error occurrence.
@@ -29,10 +30,10 @@ module.exports.getUserById = async (req, res, next) => {
     try {
         const user = await User.findById(id);
         if (!user) {
-            throw new Error(`404: No user with such an id found!`);
+            throw new Error({ message: `404: No user with such an id found!` });
         };
-        res.status(200).json(`200: User found by id: ${user}`);
-    } catch {
+        res.status(200).json({ message: `200: User found by id: ${user}` });
+    } catch (err) {
         next(err);
     };
 };
@@ -41,12 +42,42 @@ module.exports.getUserById = async (req, res, next) => {
 module.exports.updateUser = async (req, res, next) => {
     const id = req.params.id;
     try {
-        const user = await User.findByIdAndUpdate(id, req.body, { new: true });
+        const user = await User.findById(id);
         if (!user) {
-            throw new Error(`404: No user with such an id found!`);
+            throw new Error({ message: `404: No user with such an id found!` });
+        } else {
+            await User.findOneAndUpdate(
+                { _id: id },
+                {
+                    $set: {
+                        name: req.body.name || user.name,
+                        email: req.body.email || user.email,
+                        username: req.body.username || user.username,
+                        profilePicture: req.file ? req.file.path : user.profilePicture,
+                    },
+                },
+            );
+            res.status(200).json({ message: `200: User updated successfully: ${user}` });
         };
-        res.status(200).json(`200: User updated successfully: ${user}`);
-    } catch {
+    } catch (err) {
+        next(err);
+    };
+};
+
+// controller for deleting a single user from db
+module.exports.deleteUser = async (req, res, next) => {
+    const id = req.params.id;
+    try {
+        const user = await User.findById(id);
+        console.log(user);
+        if (!user) {
+            throw new Error({ message: `404: No user with such an id found!` });
+        } else {
+            await cloudinary.uploader.destroy(`profile_picture/${user._id}`);
+            await User.deleteOne({ _id: id });
+            res.status(201).json({ message: 'User deleted. Bye Felicia... o(TヘTo)' });
+        } 
+    } catch (err) {
         next(err);
     };
 };
