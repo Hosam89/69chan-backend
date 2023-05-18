@@ -14,6 +14,9 @@ const User = require('../model/userModel')
 // import models
 const Post = require('../model/postModel')
 
+//Controller Imports
+const { searchQuary } = require('../controllers/postController')
+
 // destruct envs
 const { CLOUD_NAME, API_KEY, API_SECRET, SALT_ROUND } = process.env
 
@@ -102,15 +105,13 @@ route
     }
   })
   // define route handler for GET request on root endpoint
-  .get('/', async (req, res) => {
+  .get('/', searchQuary, async (req, res) => {
     try {
-      // fetch all posts from db
+      // fetch all posts from the database
       const posts = await Post.find()
       res.status(200).json(posts)
-      // respond with status 200 and posts
-      res.status(200).json
     } catch (err) {
-      // respond with status 404 and err msg
+      // respond with status 404 and error message
       res.status(404).json(err)
     }
   })
@@ -142,7 +143,7 @@ route
     const id = req.params.id
     try {
       const post = await Post.findById(id)
-      console.log(post)
+
       // find post by ID and delete it
       if (!post) {
         res.status(404).json({ message: 'Post not found.' })
