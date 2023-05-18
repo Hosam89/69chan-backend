@@ -10,6 +10,7 @@ const mongoose = require('mongoose')
 const multer = require('multer')
 const socketio = require('socket.io')
 
+const { userSearch } = require('../controllers/userController')
 // import models
 const User = require('../model/userModel')
 
@@ -143,7 +144,7 @@ route
     }
   })
   // define route handler for GET request on root endpoint
-  .get('/', async (req, res) => {
+  .get('/', userSearch, async (req, res) => {
     try {
       // fetch all users from db
       const users = await User.find()

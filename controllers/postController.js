@@ -1,6 +1,6 @@
 const Post = require('../model/postModel')
 
-module.exports.searchQuary = async (req, res) => {
+module.exports.tagSearch = async (req, res) => {
   try {
     const tag = req.query.tag
     const posts = await Post.find()
