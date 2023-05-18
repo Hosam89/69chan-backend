@@ -15,7 +15,7 @@ const User = require('../model/userModel')
 const Post = require('../model/postModel')
 
 //Controller Imports
-const { searchQuary } = require('../controllers/postController')
+const { tagSearch } = require('../controllers/postController')
 
 // destruct envs
 const { CLOUD_NAME, API_KEY, API_SECRET, SALT_ROUND } = process.env
@@ -105,7 +105,7 @@ route
     }
   })
   // define route handler for GET request on root endpoint
-  .get('/', searchQuary, async (req, res) => {
+  .get('/', tagSearch, async (req, res) => {
     try {
       // fetch all posts from the database
       const posts = await Post.find()
