@@ -25,16 +25,20 @@ module.exports.getAllUsers = async (req, res, next) => {
   }
 }
 
-module.exports.userSearch = async (req, res) => {
-  try {
-    const userName = req.query.user
-    const users = await User.find()
-    const matchingUsers = users.filter((user) => user.name.includes(userName))
+module.exports.userSearch = async (req, res, next) => {
+  if (req.query.user) {
+    try {
+      const userName = req.query.user
+      const users = await User.find()
+      const matchingUsers = users.filter((user) => user.name.includes(userName))
 
-    res.status(200).json(matchingUsers)
-  } catch (error) {
-    console.log(error)
-    res.status(500).json({ message: 'Error searching by user Name', error })
+      res.status(200).json(matchingUsers)
+    } catch (error) {
+      console.log(error)
+      res.status(500).json({ message: 'Error searching by user Name', error })
+    }
+  } else {
+    next()
   }
 }
 
