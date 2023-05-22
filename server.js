@@ -3,7 +3,7 @@ const bcrypt = require('bcrypt');
 const cloudinary = require('cloudinary').v2;
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const cors = require('cors');
-const dotenv = require('dotenv').config();
+require('dotenv').config();
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
@@ -15,25 +15,13 @@ const socketio = require('socket.io');
 const userRoute = require('./routes/userRoute');
 const postRoute = require('./routes/postRoute');
 
-// initialize express
-const app = express();
-
-// IMPORT CONTROLLERS TO ROUTES NOT SERVER DOFUS!
-// const authController = require('./controllers/authController');
-// const userController = require('./controllers/userController');
-// const postController = require('./controllers/postController');
+const app = express(); // initialize express
 
 // import middlewares
+const { connectMongoDB } = require('./lib/mongoose'); // destruct mongoDB connector
+const { errorHandler } = require('./middlewares/errorHandler'); // destruct errorHandler
 
-// destructured mongoDB connector
-const { connectMongoDB } = require('./lib/mongoose');
-connectMongoDB();
-
-// destructured errorHandler
-const { errorHandler } = require('./middlewares/errorHandler');
-
-// destruct envs
-const { DB_USER, DB_PASS, DB_HOST, DB_NAME, PORT, FRONTEND_URL } = process.env;
+const { PORT, FRONTEND_URL } = process.env; // destruct envs
 
 
 
@@ -75,17 +63,14 @@ app.use(
 app.use(express.json());
 
 // define routes
-app.use("/users", userRoute);
-app.use("/posts", postRoute);
+app.use('/users', userRoute);
+app.use('/posts', postRoute);
+// app.use('/auth', authRoute);
+
 
 // define middlewares
-
-// make sure the error handler is always the last invoked middleware
-app.use(errorHandler);
-
-// IMPORT CONTROLLERS TO ROUTES AND THEN ONLY IMPORT ROUTES TO SERVER EZ PZ
-// app.post('/signup', authController.createUser);
-// app.get('/users', userController.getAllUsers);
+connectMongoDB();
+app.use(errorHandler); // error handler must be last invoked middleware
 
 // listen to server
 app.listen(PORT || 3003, () => {
