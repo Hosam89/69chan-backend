@@ -55,13 +55,13 @@ storage = new CloudinaryStorage({
 const upload = multer({ storage: storage })
 
 // create new router object
-const route = express.Router()
+const router = express.Router()
 
 // Note: Routes are added in order of complexity as it's considered best practice.
 // That should be the case, but I'm too lazy to put the patch route above the rest, lul.
 
 // define POST endpoint for user posts
-route
+router
   .post('/add', upload.single('mediaUrl'), async (req, res) => {
     // create a new post object from Post model
     const newPost = new Post({
@@ -193,4 +193,4 @@ route
     }
   })
 
-module.exports = route
+module.exports = router

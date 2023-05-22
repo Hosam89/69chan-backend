@@ -41,7 +41,7 @@ UserSchema.pre('findOneAndUpdate', function (next) {
 // compare the password entered by the user with the hashed password in the database
 UserSchema.methods.comparePassword = function (candidatePassword, cb) {
   bcrypt.compare(candidatePassword, this.password, function (err, isMatch) {
-    if (err) return cb(err);
+    if (err) return cb(err); //cb(err) passes errors down to error handler the same way next(err) does
     cb(null, isMatch);
   });
 };

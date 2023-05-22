@@ -13,16 +13,18 @@ const socketio = require('socket.io');
 // import models
 const User = require('../model/userModel');
 
+
+
+// COMMENTED OUT ENVS AS THESE ARE USED IN THEIR RESPECTIVE CONTROLLERS / HANDLERS
 // destruct envs
 const { CLOUD_NAME, API_KEY, API_SECRET, SALT_ROUND } = process.env;
-
+// COMMENTED OUT STORAGE SETUP AS FALLBACK IF AUTHCONTROLLER / AUTHHANDLER FAIL
 // set up cloudinary configuration
 cloudinary.config({
   cloud_name: CLOUD_NAME,
   api_key: API_KEY,
   api_secret: API_SECRET,
 });
-
 // set up multer and cloudinary storage engine
 storage = new CloudinaryStorage({
   cloudinary: cloudinary,
@@ -49,18 +51,18 @@ storage = new CloudinaryStorage({
     },
   },
 });
-
 // set up multer middleware for handling file uploads
 const upload = multer({ storage: storage });
 
+
+
 // create new router object
-const route = express.Router();
+const router = express.Router();
 
 // Note: Routes are added in order of complexity as it's considered best practice.
-// That should be the case, but I'm too lazy to put the patch route above the rest, lul.
 
 // define POST endpoint for signing up a new user to db
-route
+router
     .post('/add', upload.single('profilePicture'), async (req, res) => {
         // generate salt and hash for the user password
         const salt = bcrypt.genSaltSync(Number(SALT_ROUND));
@@ -206,5 +208,5 @@ route
         }
     });
 
-module.exports = route;
+module.exports = router;
 
