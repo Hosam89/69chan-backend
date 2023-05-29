@@ -15,7 +15,7 @@ const User = require('../model/userModel')
 const Post = require('../model/postModel')
 
 //Controller Imports
-const { tagSearch } = require('../controllers/postController')
+const { tagSearch, postliked } = require('../controllers/postController')
 
 // destruct envs
 const { CLOUD_NAME, API_KEY, API_SECRET, SALT_ROUND } = process.env
@@ -193,5 +193,6 @@ router
       res.status(500).json({ message: err.message })
     }
   })
+  .patch('/like', postliked)
 
 module.exports = router
