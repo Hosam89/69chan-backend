@@ -65,7 +65,7 @@ const router = express.Router()
 
 // define POST endpoint for user posts
 router
-  .post('/add', upload.single('mediaUrl'), async (req, res) => {
+  .post('/add', upload.single('mediaUrl'), async (req, res, next) => {
     // create a new post object from Post model
     const newPost = new Post({
       title: req.body.title,
@@ -82,12 +82,11 @@ router
       const result = await cloudinary.uploader.upload(req.file.path, {
         public_id: `user_posts/${newPost.user}/post`,
       })
-
       newPost.mediaUrl = result.secure_url
       await newPost.save()
+      res.status(200).json({ message: 'Post added, yay~' });
     } catch (err) {
-      // catch errors and send status 302 response with thrown error msg
-      res.status(302).json({ message: err.message })
+      next(err)
     }
   })
   // define GET endpoint for retrieving a single user post
@@ -193,6 +192,6 @@ router
       res.status(500).json({ message: err.message })
     }
   })
-  .patch('/like', postliked)
+  //.patch('/like', postliked)
 
 module.exports = router

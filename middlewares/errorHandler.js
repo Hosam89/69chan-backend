@@ -7,25 +7,25 @@ module.exports.errorHandler = (err, req, res, next) => {
     // followed by the appropriate status response.
     switch (err.status) {
         case 400:
-            res.status(400).json({ message: '400: Bad Request!' })
+            res.status(400).json({ message: err.message || 'Bad Request!' })
             break;
         case 401:
-            res.status(401).json({ message: '401: Unauthorized!' })
+            res.status(401).json({ message: err.message || 'Unauthorized!' })
             break;
         case 403:
-            res.status(403).json({ message: '403: Forbidden!' })
+            res.status(403).json({ message: err.message || 'Forbidden!' })
             break;
         case 404:
-            res.status(404).json({ message: '404: Not Found!' })
+            res.status(404).json({ message: err.message || 'Not Found!' })
             break;
         case 409:
-            res.status(409).json({ message: '409: Conflict!' })
+            res.status(409).json({ message: err.message || 'Conflict!' })
             break;
         case 422:
-            res.status(422).json({ message: '422: Unprocessable Entity!' })
+            res.status(422).json({ message: err.message || 'Unprocessable Entity!' })
             break;
         case 500:
-            res.status(500).json({ message: '500: Internal Server Error!' })
+            res.status(500).json({ message: err.message || 'Internal Server Error!' })
             break;
     }
 };

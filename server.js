@@ -1,76 +1,53 @@
 // import dependencies
-const bcrypt = require('bcrypt')
-const cloudinary = require('cloudinary').v2
-const { CloudinaryStorage } = require('multer-storage-cloudinary')
-const cors = require('cors')
-require('dotenv').config()
-const express = require('express')
-const jwt = require('jsonwebtoken')
-const mongoose = require('mongoose')
-const multer = require('multer')
-const { multerStorageCloudinary } = require('multer-storage-cloudinary')
-const socketio = require('socket.io')
+const cors = require('cors');
+const express = require('express');
+const cookieParser = require('cookie-parser');
 
 // import routes (modules)
-const userRoute = require('./routes/userRoute')
-const postRoute = require('./routes/postRoute')
+const userRoute = require('./routes/userRoute');
+const postRoute = require('./routes/postRoute');
+const authRoute = require('./routes/authRoute');
 
-const app = express() // initialize express
+const app = express(); // initialize express
 
 // import middlewares
-const { connectMongoDB } = require('./lib/mongoose') // destruct mongoDB connector
-const { errorHandler } = require('./middlewares/errorHandler') // destruct errorHandler
-
-const { PORT, FRONTEND_URL } = process.env // destruct envs
-
-// COMMENTED OUT CONNECTION FOR FALLBACK IF CONNECTION HANDLER FAILS
-// // atlas connection string
-// const mongoURI = `mongodb+srv://${DB_USER}:${DB_PASS}@${DB_HOST}/${DB_NAME}?retryWrites=true&w=majority`;
-
-// // connect to mongoDB atlas
-// const main = async() => {
-//     try {
-//         await mongoose.connect(mongoURI, {
-//             useNewUrlParser: true,
-//             useUnifiedTopology: true,
-//         });
-//         console.log('Connected to MongoDB Atlas!');
-//     } catch (err) {
-//         console.log('Couldnt connect to MongoDB Atlas!', err);
-//     };
-// };
-// main();
-
-// enable cross-origin resource sharing for the express app
-app.use(cors())
+const { connectMongoDB } = require('./lib/mongoose'); // destruct mongoDB connector
+const { errorHandler } = require('./middlewares/errorHandler'); // destruct errorHandler
 
 // allow requests from specified origins with specific methods
-const whitelist = ['http://localhost:3000', 'https://www.arii.me']
+const whitelist = [process.env.FRONTEND_URL, 'https://www.arii.me'];
 
+// add cors options
 const corsOptions = {
   origin: (origin, callback) => {
     if (whitelist.indexOf(origin) !== -1 || !origin) {
-      callback(null, true)
+      callback(null, true);
     } else {
-      callback(new Error('CORS issues'))
-    }
+      callback(new Error('CORS issues'));
+    };
   },
   credentials: true,
-}
-app.use(cors(corsOptions))
+};
+
+// enable cross-origin resource sharing with specified options for the express app
+app.use(cors(corsOptions));
+
+// parse incoming cookies and make them accessible in req.cookies
+app.use(cookieParser());
+
 // enable parsing of incoming JSON data in the request body by the express app
-app.use(express.json())
+app.use(express.json());
 
 // define routes
-app.use('/users', userRoute)
-app.use('/posts', postRoute)
-// app.use('/auth', authRoute);
+app.use('/users', userRoute);
+app.use('/posts', postRoute);
+app.use('/auth', authRoute);
 
 // define middlewares
-connectMongoDB()
-app.use(errorHandler) // error handler must be last invoked middleware
+connectMongoDB();
+app.use(errorHandler); // error handler must be last invoked middleware
 
 // listen to server
-app.listen(PORT || 3003, () => {
-  console.log(`Server up and running at ${PORT}`)
-})
+app.listen(process.env.PORT || 3003, () => {
+  console.log(`Server up and running at ${process.env.PORT}`);
+});
