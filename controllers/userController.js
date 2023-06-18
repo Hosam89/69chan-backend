@@ -67,10 +67,10 @@ module.exports.userSearch = async (req, res, next) => {
       const userName = req.query.user;
       const users = await User.find();
       const matchingUsers = users.filter((user) => user.name.includes(userName));
-      res.status(200).json(matchingUsers);
+      res.status(200).json({ message: 'Found a matching user!', matchingUsers });
     } catch (err) {
       console.log(err);
-      res.status(500).json({ message: 'Error searching by user Name', err });
+      res.status(500).json({ message: 'Error searching by user Name.', err });
     };
   } else {
     next();
@@ -133,7 +133,7 @@ module.exports.deleteUser = async (req, res, next) => {
     if (!user) {
       throw new Error({ message: `404: No user with such an id found!` });
     } else {
-      // not necessary to loop through posts if the entire folder is deleted
+      // delete all their posts aswell
       for (const post of posts) {
         await cloudinary.uploader.destroy(`user_posts/${user._id}/post`);
         await post.deleteOne();

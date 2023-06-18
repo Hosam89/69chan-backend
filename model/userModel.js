@@ -1,5 +1,5 @@
-const mongoose = require("mongoose");
-const bcrypt = require("bcrypt");
+const mongoose = require("mongoose")
+const bcrypt = require("bcrypt")
 
 const UserSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
@@ -7,7 +7,7 @@ const UserSchema = new mongoose.Schema({
   name: { type: String, required: true },
   username: { type: String },
   profilePicture: { type: String },
-});
+})
 
 // usually you hash/salt inside the appropriate model; like our userModel here.
 //
@@ -27,24 +27,24 @@ const UserSchema = new mongoose.Schema({
 
 // pre-hook for updating password field
 UserSchema.pre('findOneAndUpdate', function (next) {
-  const update = this.getUpdate();
+  const update = this.getUpdate()
   if (update.password) {
     bcrypt.hash(update.password, Number(process.env.SALT_ROUND), function (err, hash) {
-      if (err) return next(err);
-      update.password = hash;
-      next();
-    });
-  };
-});
+      if (err) return next(err)
+      update.password = hash
+      next()
+    })
+  }
+})
 
 // compare the password entered by the user with the hashed password in the database
 UserSchema.methods.comparePassword = function (candidatePassword, cb) {
   bcrypt.compare(candidatePassword, this.password, function (err, isMatch) {
-    if (err) return cb(err); //cb(err) passes errors down to error handler the same way next(err) does
-    cb(null, isMatch);
-  });
-};
+    if (err) return cb(err) //cb(err) passes errors down to error handler the same way next(err) does
+    cb(null, isMatch)
+  })
+}
 
-const User = mongoose.model("User", UserSchema);
+const User = mongoose.model("User", UserSchema)
 
-module.exports = User;
+module.exports = User

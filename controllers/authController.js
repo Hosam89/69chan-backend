@@ -49,6 +49,7 @@ module.exports.uploadProfilePicture = upload.single('profilePicture');
 // controller for user signup
 module.exports.signup = async (req, res, next) => {
     try {
+        console.log(req.body);
         // retrieve user from db by email provided in request body
         const foundUser = await User.findOne({ email: req.body.email });
         console.log(foundUser);
@@ -65,7 +66,7 @@ module.exports.signup = async (req, res, next) => {
             name: req.body.name,
             email: req.body.email,
             password: hash,
-            profilePicture: req.file.path,
+            profilePicture: req.file.path || `https://google.com`
         });
         await newUser.save(); // save the new user object to the database
         // upload the profile picture to cloudinary storage
@@ -76,7 +77,7 @@ module.exports.signup = async (req, res, next) => {
         await newUser.save(); // update newUser with the profilePicture URL
         console.log(newUser);
         // generate a signup token
-        const token = jwt.sign({ newUserId: newUser._id }, process.env.JWT_SECRET, {
+        const token = jwt.sign({ newUserId: newUser._id, newUserName: newUser.username, newUserProfilePicture: newUser.profilePicture }, process.env.JWT_SECRET, {
             expiresIn: '5m' // expires in 5 minutes (in case signup was erroneous)
         });
         // store the token as a cookie
